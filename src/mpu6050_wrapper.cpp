@@ -3,16 +3,20 @@
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 
-MPU6050 mpu;  // class default I2C address is 0x68
+MPU6050 mpu;
+` // class default I2C address is 0x68
 
-void initMpu6050() {
+    void
+    initMpu6050()
+{
   uint8_t devStatus;
 
   // initialize device
   mpu.initialize();
 
   // verify connection
-  if (!mpu.testConnection()) {
+  if (!mpu.testConnection())
+  {
     Serial.println(F("MPU6050 connection failed"));
     while (1)
       ;
@@ -29,7 +33,8 @@ void initMpu6050() {
   // mpu.setZGyroOffset(-85);
   // mpu.setZAccelOffset(1788);
 
-  if (devStatus == 0) {  // Successful DMP initialization
+  if (devStatus == 0)
+  { // Successful DMP initialization
     // Calibration Time: generate offsets and calibrate our MPU6050
     mpu.CalibrateAccel(6);
     mpu.CalibrateGyro(6);
@@ -37,7 +42,9 @@ void initMpu6050() {
 
     // turn on the DMP, now that it's ready
     mpu.setDMPEnabled(true);
-  } else {
+  }
+  else
+  {
     // Error in DMP init:
     // 1 = initial memory load failed
     // 2 = DMP configuration updates failed
@@ -51,10 +58,11 @@ void initMpu6050() {
   }
 }
 
-uint8_t fifoBuffer[64];  // FIFO storage buffer
+uint8_t fifoBuffer[64]; // FIFO storage buffer
 
-bool readMpu6050() {
-  if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer) == 1)  // Get the Latest packet
+bool readMpu6050()
+{
+  if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer) == 1) // Get the Latest packet
     return true;
   else
     return false;

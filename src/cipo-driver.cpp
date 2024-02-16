@@ -1,24 +1,28 @@
 #include "cipo-driver.hpp"
-
 #include "reset.hpp"
 
-void RovCommsPeripheral::init() {
-}  // init
+// Does nothing?
+void RovCommsPeripheral::init()
+{
+} // init
 
-int RovCommsPeripheral::awaitHandshake() {
+int RovCommsPeripheral::awaitHandshake()
+{
   LOGGING_SERIAL.print(F("Awaiting handshake 0x"));
   LOGGING_SERIAL.println(EXPECTED_HANDSHAKE_START, HEX);
 
   uint8_t data;
 
-  do {
+  do
+  {
     // Wait for data
     while (!mySerial.available())
       ;
 
     // Read and verify data
     data = mySerial.read();
-    if (data != (EXPECTED_HANDSHAKE_START)) {
+    if (data != (EXPECTED_HANDSHAKE_START))
+    {
       LOGGING_SERIAL.print(F("Handshake failed; expected 0x"));
       LOGGING_SERIAL.print(EXPECTED_HANDSHAKE_START, HEX);
       LOGGING_SERIAL.print(F(" but got 0x"));
@@ -30,17 +34,20 @@ int RovCommsPeripheral::awaitHandshake() {
 
   unsigned long timestamp = millis() & UINT32_MAX, recieved_timestamp = 0;
   mySerial.flush();
-  for (uint8_t i = 0; i < sizeof(timestamp); i++) {
+  for (uint8_t i = 0; i < sizeof(timestamp); i++)
+  {
     mySerial.write((uint8_t)(timestamp >> (i * 8)) & 0xFFu);
   }
 
   // Read echo bytes
-  for (uint8_t i = 0; i < sizeof(timestamp); i++) {
+  for (uint8_t i = 0; i < sizeof(timestamp); i++)
+  {
     while (!mySerial.available())
-      ;  // Wait for echo bytes
+      ; // Wait for echo bytes
     recieved_timestamp |= ((unsigned long)mySerial.read()) << (i * 8);
   }
-  if (recieved_timestamp != timestamp) {
+  if (recieved_timestamp != timestamp)
+  {
     // Failed; restart handshake
     LOGGING_SERIAL.print(F("Handshake failed; expected timestamp"));
     LOGGING_SERIAL.print(timestamp);
@@ -52,7 +59,8 @@ int RovCommsPeripheral::awaitHandshake() {
   return 0;
 }
 
-void RovCommsPeripheral::sendChecksum() {
+void RovCommsPeripheral::sendChecksum()
+{
   mySerial.write(cipo_checksum);
   mySerial.flush();
 
@@ -62,9 +70,10 @@ void RovCommsPeripheral::sendChecksum() {
 #endif
 
   cipo_checksum = 0;
-};  // sendChecksum
+}; // sendChecksum
 
-void RovCommsPeripheral::sendBlock(uint8_t data) {
+void RovCommsPeripheral::sendBlock(uint8_t data)
+{
   cipo_checksum += data;
   mySerial.write(data);
 
@@ -77,28 +86,36 @@ void RovCommsPeripheral::sendBlock(uint8_t data) {
 
   cipo_index++;
 
-  if (cipo_index >= WRITE_BUFFER_LENGTH) {
+  if (cipo_index >= WRITE_BUFFER_LENGTH)
+  {
     this->sendChecksum();
     cipo_index = 0;
   }
-};  // sendBlock
+}; // sendBlock
 
-void RovCommsPeripheral::sendBlocks(const uint8_t data[], size_t length) {
+void RovCommsPeripheral::sendBlocks(const uint8_t data[], size_t length)
+{
   for (size_t i = 0; i < length; i++)
     this->sendBlock(data[i]);
-};  // sendBlocks
+}; // sendBlocks
 
-bool RovCommsPeripheral::readBlocks() {
+bool RovCommsPeripheral::readBlocks()
+{
   uint8_t data;
-  while (mySerial.available()) {
+  while (mySerial.available())
+  {
     data = mySerial.read();
-    if (data == -1) break;
+    if (data == -1)
+      break;
 
-    if (copi_index < READ_BUFFER_LENGTH) {
+    if (copi_index < READ_BUFFER_LENGTH)
+    {
       // Store everything but the checksum
       read_buffer[copi_index] = data;
       copi_checksum += data;
-    } else {
+    }
+    else
+    {
       // We've read the entire buffer, verify the checksum and return true
       copi_checksum_status = (copi_checksum == data);
       copi_index = 0;
@@ -124,4 +141,4 @@ bool RovCommsPeripheral::readBlocks() {
   }
   // We haven't read the entire buffer yet, return false
   return false;
-};  // readBlocks
+}; // readBlocks

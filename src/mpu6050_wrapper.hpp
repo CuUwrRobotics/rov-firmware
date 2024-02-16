@@ -5,8 +5,8 @@
 
 void initMpu6050();
 
-extern uint8_t fifoBuffer[64];  // FIFO storage buffer
+extern uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 bool readMpu6050();
 
-#endif  // End of include guard for MPU6050_WRAPPER_HPP
+#endif // #ifndef MPU6050_WRAPPER_HPP

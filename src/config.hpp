@@ -43,4 +43,4 @@ const unsigned long DATA_SERIAL_BAUD_RATE_FAST = 2000000;
 #define LOGGING_SERIAL Serial
 #define DATA_SERIAL Serial1
 
-#endif  // End of CONFIG_H include guard
+#endif // #ifndef CONFIG_HPP
