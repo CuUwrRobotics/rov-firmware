@@ -13,7 +13,7 @@
 #define MODE_CIPO 2
 
 Servo motion_motors[MOTION_MOTOR_COUNT];
-Servo servos[SERVO_COUNT];
+Servo claw_servo;
 
 char writebuf[256];
 
@@ -53,11 +53,11 @@ void setup()
   LOGGING_SERIAL.begin(LOGGING_SERIAL_BAUD_RATE);
 
   // Initalize Servo Motors
-  for (uint8_t i = 0; i < SERVO_COUNT; i++)
-  {
-    servos[i].attach(PIN_SERVOS[i]);
-    servos[i].write(SERVO_ZERO_POSITIONS[i]);
-  }
+  //for (uint8_t i = 0; i < SERVO_COUNT; i++)
+  //{
+    claw_servo.attach(PIN_SERVOS[0]);
+    claw_servo.write(SERVO_ZERO_POSITIONS[0]);
+  //}
 
   // Initalizes IC2 Devices
   Wire.begin();
@@ -207,12 +207,12 @@ void loop()
     motion_motors[5].writeMicroseconds(cipo_driver.popReadBuffer<uint16_t>());
 
     // Handle servo updates from last cycle
-    servos[0].write(cipo_driver.popReadBuffer<uint8_t>());
-    servos[1].write(cipo_driver.popReadBuffer<uint8_t>());
-    servos[2].write(cipo_driver.popReadBuffer<uint8_t>());
-    servos[3].write(cipo_driver.popReadBuffer<uint8_t>());
-    servos[4].write(cipo_driver.popReadBuffer<uint8_t>());
-    servos[5].write(cipo_driver.popReadBuffer<uint8_t>());
+    claw_servo.write(cipo_driver.popReadBuffer<uint8_t>());
+//    servos[1].write(cipo_driver.popReadBuffer<uint8_t>());
+//    servos[2].write(cipo_driver.popReadBuffer<uint8_t>());
+//    servos[3].write(cipo_driver.popReadBuffer<uint8_t>());
+//    servos[4].write(cipo_driver.popReadBuffer<uint8_t>());
+//    servos[5].write(cipo_driver.popReadBuffer<uint8_t>());
 
     // Sets mode to CIPO (Controller In, Peripheral Out)
     mode = MODE_CIPO;
