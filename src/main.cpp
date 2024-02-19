@@ -55,7 +55,7 @@ void setup()
   // Initalize Servo Motors
   //for (uint8_t i = 0; i < SERVO_COUNT; i++)
   //{
-    claw_servo.attach(PIN_SERVOS[0]);
+    claw_servo.attach(7);
     claw_servo.write(SERVO_ZERO_POSITIONS[0]);
   //}
 
