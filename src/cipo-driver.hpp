@@ -8,89 +8,116 @@
 
 #define DEBUG_CIPO_DRIVER 0
 
+/**
+ * @brief Manages communication with topside
+ *
+ */
 class RovCommsPeripheral
 {
-  uint8_t cipo_checksum, copi_checksum;
+    uint8_t cipo_checksum, copi_checksum;
 
-  uint8_t copi_index, cipo_index;
+    uint8_t copi_index, cipo_index;
 
-  uint8_t read_buffer_index;
-  bool copi_checksum_status;
+    uint8_t read_buffer_index;
+    bool copi_checksum_status;
 
-  uint8_t read_buffer[READ_BUFFER_LENGTH];
+    uint8_t read_buffer[READ_BUFFER_LENGTH];
 
-  HardwareSerial &mySerial;
+    HardwareSerial &mySerial;
 
-  void sendChecksum();
+    void sendChecksum();
 
 public:
-  RovCommsPeripheral(HardwareSerial &ser = DATA_SERIAL)
-      : cipo_checksum(0),
-        copi_checksum(0),
-        copi_index(0),
-        cipo_index(0),
-        read_buffer_index(0),
-        copi_checksum_status(false),
-        mySerial(ser){};
+    RovCommsPeripheral(HardwareSerial &ser = DATA_SERIAL)
+        : cipo_checksum(0),
+          copi_checksum(0),
+          copi_index(0),
+          cipo_index(0),
+          read_buffer_index(0),
+          copi_checksum_status(false),
+          mySerial(ser){};
 
-  void init();
+    void init();
 
-  int awaitHandshake();
+    int awaitHandshake();
 
-  void sendBlock(uint8_t data);
+    void sendBlock(uint8_t data);
 
-  void sendBlocks(const uint8_t data[], size_t length);
+    void sendBlocks(const uint8_t data[], size_t length);
 
-  template <typename T>
-  void send(const T &data)
-  {
-    this->sendBlocks((uint8_t *)&data, sizeof(T));
-  }
-
-  bool readBlocks();
-
-  inline bool checksumGood() const { return copi_checksum_status; }
-  inline void resetReadBuffer() { read_buffer_index = 0; }
-
-  uint8_t popReadBuffer()
-  {
-    uint8_t data = read_buffer[read_buffer_index++];
-    if (read_buffer_index > READ_BUFFER_LENGTH)
+    /**
+     * @brief
+     *
+     * @tparam T Type of data being sent
+     * @param data
+     */
+    template <typename T>
+    void send(const T &data)
     {
-      LOGGING_SERIAL.println(F("Read buffer overflow in RovCommsPeripheral::popReadBuffer()"));
-      read_buffer_index = 0;
-      requestReset();
+        this->sendBlocks((uint8_t *)&data, sizeof(T));
     }
-    return data;
-  }
 
-  uint8_t *popReadBuffer(size_t length = 1)
-  {
-    uint8_t *data = &read_buffer[read_buffer_index];
-    read_buffer_index += length;
-    if (read_buffer_index > READ_BUFFER_LENGTH)
-    {
-      LOGGING_SERIAL.println(F("Read buffer overflow in RovCommsPeripheral::popReadBuffer()"));
-      read_buffer_index = 0;
-      requestReset();
-    }
-    return data;
-  }
+    bool readBlocks();
 
-  template <typename T>
-  T popReadBuffer()
-  {
-    T data = *(T *)&read_buffer[read_buffer_index];
-    // Serial.println("Pop: " + String(data) + " at " + String(read_buffer_index) + " of " + String(READ_BUFFER_LENGTH) + " with size " + String(sizeof(T)) + "");
-    read_buffer_index += sizeof(T);
-    if (read_buffer_index > READ_BUFFER_LENGTH)
+    inline bool checksumGood() const { return copi_checksum_status; }
+    inline void resetReadBuffer() { read_buffer_index = 0; }
+
+    /**
+     * @brief
+     *
+     * @return uint8_t
+     */
+    uint8_t popReadBuffer()
     {
-      LOGGING_SERIAL.println(F("Read buffer overflow in RovCommsPeripheral::popReadBuffer()"));
-      read_buffer_index = 0;
-      requestReset();
+        uint8_t data = read_buffer[read_buffer_index++];
+        if (read_buffer_index > READ_BUFFER_LENGTH)
+        {
+            LOGGING_SERIAL.println(F("Read buffer overflow in RovCommsPeripheral::popReadBuffer()"));
+            read_buffer_index = 0;
+            requestReset();
+        }
+        return data;
     }
-    return data;
-  }
+
+    /**
+     * @brief
+     *
+     * @param length
+     * @return uint8_t*
+     */
+    uint8_t *popReadBuffer(size_t length = 1)
+    {
+        uint8_t *data = &read_buffer[read_buffer_index];
+        read_buffer_index += length;
+        if (read_buffer_index > READ_BUFFER_LENGTH)
+        {
+            LOGGING_SERIAL.println(F("Read buffer overflow in RovCommsPeripheral::popReadBuffer()"));
+            read_buffer_index = 0;
+            requestReset();
+        }
+        return data;
+    }
+
+    /**
+     * @brief
+     *
+     * @tparam T
+     * @return T
+     */
+    template <typename T>
+    T popReadBuffer()
+    {
+        T data = *(T *)&read_buffer[read_buffer_index];
+        // Serial.println("Pop: " + String(data) + " at " + String(read_buffer_index) + " of " + String(READ_BUFFER_LENGTH) + " with size " + String(sizeof(T)) + "");
+        read_buffer_index += sizeof(T);
+        if (read_buffer_index > READ_BUFFER_LENGTH)
+        {
+            LOGGING_SERIAL.println(F("Read buffer overflow in RovCommsPeripheral::popReadBuffer()"));
+            read_buffer_index = 0;
+            requestReset();
+        }
+        return data;
+    }
 
 }; // class RovCommsPeripheral
 

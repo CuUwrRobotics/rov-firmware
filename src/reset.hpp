@@ -3,8 +3,13 @@
 
 extern bool reset_requested;
 
+/**
+ * @brief Triggers topside connection reset on next main loop cycle
+ *
+ */
 inline void requestReset()
 {
+  // Sets reset_requested to true
   reset_requested = true;
 }
 
